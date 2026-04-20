@@ -1,0 +1,108 @@
+ <div class="job-list-page">
+  <mat-card>
+    <mat-card-header>
+      <mat-icon mat-card-avatar>work</mat-icon>
+      <mat-card-title>Job Offers</mat-card-title>
+      <mat-card-subtitle>
+        @if (!isLoading()) {
+          {{ totalElements() | number }} offers in database
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (isLoading()) {
+        <div class="loading-wrapper">
+          <mat-spinner diameter="48" />
+          <p>Loading job offers...</p>
+        </div>
+      } @else if (dataSource().length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <h3>No job offers yet</h3>
+          <p>Upload a JSON file on the <a routerLink="/upload">Import Data</a> page.</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource()" class="offers-table">
+
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef>Role</th>
+              <td mat-cell *matCellDef="let offer">
+                <div class="role-cell">
+                  <span class="role-title">{{ offer.role }}</span>
+                  @if (offer.remote) {
+                    <span class="remote-badge">Remote</span>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="company">
+              <th mat-header-cell *matHeaderCellDef>Company</th>
+              <td mat-cell *matCellDef="let offer">{{ offer.company }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="city">
+              <th mat-header-cell *matHeaderCellDef>City</th>
+              <td mat-cell *matCellDef="let offer">{{ offer.city ?? '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="seniority">
+              <th mat-header-cell *matHeaderCellDef>Seniority</th>
+              <td mat-cell *matCellDef="let offer">
+                @if (offer.seniority) {
+                  <span class="seniority-badge" [class]="'level-' + offer.seniority.toLowerCase()">
+                    {{ offer.seniority }}
+                  </span>
+                } @else {
+                  —
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="salary">
+              <th mat-header-cell *matHeaderCellDef>Salary Range</th>
+              <td mat-cell *matCellDef="let offer" class="salary-cell">{{ formatSalary(offer) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let offer">{{ offer.category ?? '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="skills">
+              <th mat-header-cell *matHeaderCellDef>Skills</th>
+              <td mat-cell *matCellDef="let offer">
+                <mat-chip-set>
+                  @for (skill of offer.skills.slice(0, 4); track skill.name) {
+                    <mat-chip
+                      [matTooltip]="skill.proficiencyLevel ?? ''"
+                      class="skill-chip"
+                    >
+                      {{ skill.name }}
+                    </mat-chip>
+                  }
+                  @if (offer.skills.length > 4) {
+                    <mat-chip class="more-chip">+{{ offer.skills.length - 4 }}</mat-chip>
+                  }
+                </mat-chip-set>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [length]="totalElements()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[10, 20, 50, 100]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons
+        />
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

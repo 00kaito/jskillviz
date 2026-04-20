@@ -1,0 +1,75 @@
+<div class="upload-page">
+  <mat-card class="upload-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>cloud_upload</mat-icon>
+      <mat-card-title>Import Job Offers</mat-card-title>
+      <mat-card-subtitle>Upload a JSON file containing job offer data</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div
+        class="drop-zone"
+        [class.drag-over]="isDragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <input #fileInput type="file" accept=".json" hidden (change)="onFileSelected($event)" />
+
+        <mat-icon class="drop-icon">upload_file</mat-icon>
+
+        @if (selectedFile()) {
+          <p class="file-name">
+            <mat-icon>description</mat-icon>
+            {{ selectedFile()!.name }}
+          </p>
+        } @else {
+          <p class="drop-text">Drag & drop a JSON file here</p>
+          <p class="drop-subtext">or</p>
+        }
+
+        <button mat-stroked-button color="primary" type="button" (click)="triggerFileInput(fileInput)">
+          <mat-icon>folder_open</mat-icon>
+          Browse File
+        </button>
+      </div>
+
+      @if (isUploading()) {
+        <div class="progress-section">
+          <p>Uploading and processing...</p>
+          <mat-progress-bar mode="indeterminate" color="primary" />
+        </div>
+      }
+
+      @if (uploadResult()) {
+        <div class="result-section success">
+          <mat-icon>check_circle</mat-icon>
+          <div class="result-details">
+            <h3>Import Complete</h3>
+            <p>Total processed: <strong>{{ uploadResult()!.total }}</strong></p>
+            <p>Imported: <strong class="imported">{{ uploadResult()!.imported }}</strong></p>
+            <p>Skipped (duplicates): <strong class="skipped">{{ uploadResult()!.skipped }}</strong></p>
+            @if (uploadResult()!.errors.length > 0) {
+              <mat-divider />
+              <p class="errors-label">Errors:</p>
+              @for (error of uploadResult()!.errors; track error) {
+                <p class="error-item">{{ error }}</p>
+              }
+            }
+          </div>
+        </div>
+      }
+
+      @if (uploadError()) {
+        <div class="result-section error">
+          <mat-icon>error</mat-icon>
+          <p>{{ uploadError() }}</p>
+        </div>
+      }
+    </mat-card-content>
+
+    <mat-card-actions>
+      <p class="hint">Accepted format: JSON array of job offer objects (see <code>sample-jobs.json</code>)</p>
+    </mat-card-actions>
+  </mat-card>
+</div>
